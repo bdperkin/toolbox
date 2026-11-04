@@ -1,0 +1,120 @@
+# .pre-commit-config.yaml
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+minimum_pre_commit_version: "3.2.0"
+
+repos:
+  # =========================================================================
+  # 1. Meta Hooks (Validates pre-commit configuration itself)
+  # =========================================================================
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  # =========================================================================
+  # 2. Dependency Synchronization
+  # =========================================================================
+  - repo: https://github.com/pre-commit/sync-pre-commit-deps
+    rev: v0.0.5
+    hooks:
+      - id: sync-pre-commit-deps
+
+  # =========================================================================
+  # 3. Applicable hooks from pre-commit/pre-commit-hooks
+  # =========================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Git & Filesystem Integrity
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: check-merge-conflict
+      - id: destroyed-symlinks
+      - id: forbid-submodules
+
+      # Executables & Scripts (Relevant to .sh files)
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+      # Security & Permalinks
+      - id: detect-private-key
+      - id: check-vcs-permalinks
+
+      # Syntax & Structure (Targets .pre-commit-config.yaml)
+      - id: check-yaml
+        args: [--unsafe] # --unsafe allows GitLab CI custom tags like '!reference'
+
+      # Text Formatting & Standardization
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  # =========================================================================
+  # 4. Shell Script Analysis & Formatting (*.sh files)
+  # =========================================================================
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+        # -x follows sourced files; -P SCRIPTDIR resolves `source=` hints per-file
+        args: [-x, -P, SCRIPTDIR]
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.14.1-1
+    hooks:
+      - id: shfmt
+        args: [-w, -i, "2", -ci, -bn] # 2-space indent, switch-cases indented, binary ops start lines
+
+  # =========================================================================
+  # 5. Containerfile / Dockerfile Linting
+  # =========================================================================
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.15.1
+    hooks:
+      - id: hadolint
+        name: Lint Containerfiles (hadolint)
+        types: [text]
+        args: [--ignore, DL3007, --ignore, DL3041]
+        files: '(?:^|/)Containerfile(?:\..+)?$'
+
+  # =========================================================================
+  # 6. CI/CD & Schema Validation
+  # =========================================================================
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args:
+          [
+            -d,
+            "{extends: relaxed, rules: {line-length: {max: 120, level: warning}}}",
+          ]
+        files: \.(yaml|yml)$
+
+  # =========================================================================
+  # 7. Documentation Quality (README.md)
+  # =========================================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.50.0
+    hooks:
+      - id: markdownlint-fix
+        # Disables MD013 (line-length) due to README.md having lines up to 535 characters
+        args: [--disable, "MD013", "--"]
+
+  # =========================================================================
+  # 8. Prettier
+  # =========================================================================
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        additional_dependencies:
+          - prettier
+        stages:
+          - manual

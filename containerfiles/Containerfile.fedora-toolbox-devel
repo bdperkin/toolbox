@@ -1,0 +1,8 @@
+ARG BASE_IMAGE=registry.fedoraproject.org/fedora-toolbox:latest
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:slim AS gcloud-source
+FROM ${BASE_IMAGE}
+COPY --from=gcloud-source /usr/lib/google-cloud-sdk /usr/local/google-cloud-sdk
+ADD --chmod=644 https://acli.atlassian.com/linux/rpm/acli.repo /etc/yum.repos.d/acli.repo
+COPY --chmod=755 files/lib/ /tmp/files/lib/
+COPY --chmod=755 files/dnf-install-devel.sh /tmp/files/dnf-install-devel.sh
+RUN /tmp/files/dnf-install-devel.sh
