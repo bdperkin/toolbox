@@ -1,0 +1,107 @@
+name: CI / Build and Push
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    name: Pre-commit Checks
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies (Hadolint, Node.js, Pre-commit)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends hadolint nodejs
+          pip install pre-commit
+
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+
+      - name: Check for untracked/modified working tree files
+        run: |
+          git ls-files --other --directory --exclude-standard | sed q1
+
+  secret-detection:
+    name: Secret Scanning
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Gitleaks Secret Detection
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ""
+
+  build-base:
+    name: Build & Push Base Image
+    needs: [test, secret-detection]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Make
+        run: sudo apt-get install -y make
+
+      - name: Build and push base container
+        run: |
+          CONTAINER_FLAVOR=fedora-toolbox-base make push
+        env:
+          IMAGES_PAAS_REGISTRY_URL: ghcr.io
+          IMAGES_PAAS_REGISTRY_USERNAME: ${{ github.actor }}
+          IMAGES_PAAS_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-matrix:
+    name: Build & Push Matrix (${{ matrix.container_flavor }})
+    needs: [test, secret-detection]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        container_flavor:
+          - fedora-toolbox-devel
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Make
+        run: sudo apt-get install -y make
+
+      - name: Build and push flavor container
+        run: |
+          CONTAINER_FLAVOR="${{ matrix.container_flavor }}" make push
+        env:
+          IMAGES_PAAS_REGISTRY_URL: ghcr.io
+          IMAGES_PAAS_REGISTRY_USERNAME: ${{ github.actor }}
+          IMAGES_PAAS_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
