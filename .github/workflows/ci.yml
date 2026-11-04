@@ -24,10 +24,9 @@ jobs:
       - name: Install dependencies (Hadolint, Pre-commit)
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends hadolint
           pip install pre-commit
 
-          # Install hadolint static binary
+          # Download and install hadolint static binary
           sudo wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
           sudo chmod +x /usr/local/bin/hadolint
 
