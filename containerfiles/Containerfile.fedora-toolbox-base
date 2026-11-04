@@ -1,1 +1,2 @@
+# hadolint ignore=DL3007
 FROM registry.fedoraproject.org/fedora-toolbox:latest
