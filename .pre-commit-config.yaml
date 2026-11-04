@@ -74,14 +74,10 @@ repos:
   # =========================================================================
   # 5. Containerfile / Dockerfile Linting
   # =========================================================================
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.15.1
+  - repo: https://github.com/shenxianpeng/hadolint-pre-commit
+    rev: v2.15.1.3 # Match your desired hadolint version tag
     hooks:
       - id: hadolint
-        name: Lint Containerfiles (hadolint)
-        types: [text]
-        args: [--ignore, DL3007, --ignore, DL3041]
-        files: '(?:^|/)Containerfile(?:\..+)?$'
 
   # =========================================================================
   # 6. CI/CD & Schema Validation
