@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=registry.fedoraproject.org/fedora-toolbox:latest
+ARG BASE_IMAGE=ghcr.io/bdperkin/toolbox/fedora-toolbox-base:latest
 FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:slim AS gcloud-source
 FROM ${BASE_IMAGE}
 COPY --from=gcloud-source /usr/lib/google-cloud-sdk /usr/local/google-cloud-sdk
