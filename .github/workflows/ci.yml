@@ -79,7 +79,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Containerfile.fedora-toolbox-base # Adjust if your containerfile has a different name/path
+          file: containerfiles/Containerfile.fedora-toolbox-base
           push: true
           tags: |
             ghcr.io/${{ steps.string_case.outputs.lowercase }}/fedora-toolbox-base:latest
@@ -118,7 +118,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Containerfile.${{ matrix.container_flavor }} # Adjust to match your Containerfile naming convention
+          file: containerfiles/Containerfile.${{ matrix.container_flavor }}
           push: true
           tags: |
             ghcr.io/${{ steps.string_case.outputs.lowercase }}/${{ matrix.container_flavor }}:latest
