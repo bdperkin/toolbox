@@ -20,6 +20,7 @@ acli
 chezmoi
 claude-code
 colordiff
+gh
 git-delta
 glab
 hadolint
@@ -33,6 +34,7 @@ pre-commit
 ruff
 ty
 uv
+xclip
 "
 
 PY_PKGS=$(${DNF} repoquery --queryformat="%{NAME}\n" --whatprovides python3\.*-devel | grep -P "^python3\.\d+-devel$" | sort -V | xargs -n 1)
