@@ -17,15 +17,18 @@ EOF
 
 PKGS="
 acli
+ansible
 chezmoi
 claude-code
 colordiff
+gcc
 gh
 git-delta
 glab
 hadolint
 jq
 libatomic
+libvirt-devel
 libxcrypt-compat
 make
 nodejs
