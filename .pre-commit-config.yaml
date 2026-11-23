@@ -97,7 +97,7 @@ repos:
   # 7. Documentation Quality (README.md)
   # =========================================================================
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.50.0
+    rev: v0.50.1
     hooks:
       - id: markdownlint-fix
         # Disables MD013 (line-length) due to README.md having lines up to 535 characters
